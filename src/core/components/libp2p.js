@@ -43,6 +43,10 @@ module.exports = function libp2p (self) {
                     get(opts.config, 'relay.hop.active', false))
                 }
               },
+              dht: {
+                kBucketSize: get(opts.options, 'dht.kBucketSize', 20),
+                enabledDiscovery: get(opts.options, 'dht.enabledDiscovery', true)
+              },
               EXPERIMENTAL: {
                 dht: get(opts.options, 'EXPERIMENTAL.dht', false),
                 pubsub: get(opts.options, 'EXPERIMENTAL.pubsub', false)
