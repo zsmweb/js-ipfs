@@ -76,6 +76,25 @@ module.exports = function bitswap (self) {
         return new CID(key)
       })
       return setImmediate(() => callback(null, self._bitswap.unwant(keys)))
+    }),
+
+    ledger: promisify((peerId, callback) => {
+      if (!self.isOnline()) {
+        return setImmediate(() => callback(new Error(OFFLINE_ERROR)))
+      }
+
+      const ledger = self._bitswap.ledgerForPeer(peerId)
+      if (!ledger) {
+        return callback(null, null)
+      }
+
+      callback(null, {
+        Peer: ledger.peerId,
+        Value: new Big(ledger.value),
+        Sent: new Big(ledger.sent),
+        Recv: new Big(ledger.recv),
+        Exchanged: new Big(ledger.exchanged)
+      })
     })
   }
 }
