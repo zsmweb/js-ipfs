@@ -56,9 +56,21 @@ module.exports = function block (self) {
         })
       ], callback)
     }),
-    rm: promisify((cid, callback) => {
+    rm: promisify((cid, options, callback) => {
+      if (typeof options === 'function') {
+        callback = options
+        options = {}
+      }
       cid = cleanCid(cid)
-      self._blockService.delete(cid, callback)
+      self._blockService.delete(cid, (err) => {
+        if (options.force) {
+          err = null
+        }
+        callback(err, {
+          hash: multihash.toB58String(cid.multihash),
+          err: err
+        })
+      })
     }),
     stat: promisify((cid, callback) => {
       cid = cleanCid(cid)

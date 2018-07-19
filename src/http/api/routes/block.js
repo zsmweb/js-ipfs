@@ -33,12 +33,12 @@ module.exports = (server) => {
 
   api.route({
     method: '*',
-    path: '/api/v0/block/del',
+    path: '/api/v0/block/rm',
     config: {
       pre: [
-        { method: resources.block.del.parseArgs, assign: 'args' }
+        { method: resources.block.rm.parseArgs, assign: 'args' }
       ],
-      handler: resources.block.del.handler
+      handler: resources.block.rm.handler
     }
   })
 

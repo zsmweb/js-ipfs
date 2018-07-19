@@ -125,7 +125,7 @@ exports.put = {
   }
 }
 
-exports.del = {
+exports.rm = {
   // uses common parseKey method that returns a `key`
   parseArgs: exports.parseKey,
 
@@ -133,16 +133,16 @@ exports.del = {
   handler: (request, reply) => {
     const key = request.pre.args.key
 
-    request.server.app.ipfs.block.rm(key, (err, block) => {
+    request.server.app.ipfs.block.rm(key, (err, removed) => {
       if (err) {
         log.error(err)
         return reply({
-          Message: 'Failed to delete block: ' + err,
+          Message: 'Failed to remove block: ' + err,
           Code: 0
         }).code(500)
       }
 
-      return reply()
+      return reply(removed)
     })
   }
 }

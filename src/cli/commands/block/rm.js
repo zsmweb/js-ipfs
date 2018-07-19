@@ -17,8 +17,9 @@ module.exports = {
       throw new Error('rm block with daemon running is not yet implemented')
     }
 
-    argv.ipfs.block.del(mh.fromB58String(argv.key), (err) => {
+    argv.ipfs.block.rm(mh.fromB58String(argv.key), (err) => {
       if (err) {
+        console.log(err.stack)
         throw err
       }
 
