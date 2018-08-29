@@ -2,15 +2,17 @@
 
 const bl = require('bl')
 const fs = require('fs')
-const print = require('../../utils').print
+const multibase = require('multibase')
+const { print } = require('../../utils')
 const {
   util: {
     cid
   }
 } = require('ipld-dag-pb')
+const { cidToString } = require('../../../utils/cid')
 
-function putNode (buf, enc, ipfs, cidEnc) {
-  ipfs.object.put(buf, { enc: enc }, (err, node) => {
+function putNode (buf, options, ipfs) {
+  ipfs.object.put(buf, { enc: options.inputEnc }, (err, node) => {
     if (err) {
       throw err
     }
@@ -20,7 +22,7 @@ function putNode (buf, enc, ipfs, cidEnc) {
         throw err
       }
 
-      print(`added ${cid.toBaseEncodedString(cidEnc)}`)
+      print(`added ${cidToString(cid, options.cidBase)}`)
     })
   })
 }
@@ -36,8 +38,9 @@ module.exports = {
       default: 'json'
     },
     'cid-base': {
-      default: 'base58btc',
-      describe: 'CID base to use.'
+      describe: 'Number base to display CIDs in.',
+      type: 'string',
+      choices: multibase.names
     }
   },
 
@@ -45,7 +48,7 @@ module.exports = {
     const ipfs = argv.ipfs
     if (argv.data) {
       const buf = fs.readFileSync(argv.data)
-      return putNode(buf, argv.inputEnc, ipfs)
+      return putNode(buf, argv, ipfs)
     }
 
     process.stdin.pipe(bl((err, input) => {
@@ -53,7 +56,7 @@ module.exports = {
         throw err
       }
 
-      putNode(input, argv.inputEnc, ipfs, argv.cidBase)
+      putNode(input, argv, ipfs)
     }))
   }
 }
