@@ -22,8 +22,8 @@ module.exports = {
     }
   },
 
-  handler (argv) {
-    argv.ipfs.object.new(argv.template, (err, node) => {
+  handler ({ ipfs, template, cidBase }) {
+    ipfs.object.new(template, (err, node) => {
       if (err) {
         throw err
       }
@@ -33,7 +33,7 @@ module.exports = {
           throw err
         }
 
-        print(cidToString(cid, argv.cidBase))
+        print(cidToString(cid, cidBase))
       })
     })
   }

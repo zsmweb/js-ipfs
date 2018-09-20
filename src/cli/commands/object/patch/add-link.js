@@ -19,11 +19,8 @@ module.exports = {
     }
   },
 
-  handler (argv) {
-    const ipfs = argv.ipfs
-    ipfs.object.get(argv.ref, {
-      enc: 'base58'
-    }, (err, nodeA) => {
+  handler ({ ipfs, root, name, ref, cidBase }) {
+    ipfs.object.get(ref, { enc: 'base58' }, (err, nodeA) => {
       if (err) {
         throw err
       }
@@ -33,9 +30,9 @@ module.exports = {
           throw err
         }
 
-        const link = new DAGLink(argv.name, nodeA.size, result)
+        const link = new DAGLink(name, nodeA.size, result)
 
-        ipfs.object.patch.addLink(argv.root, link, {
+        ipfs.object.patch.addLink(root, link, {
           enc: 'base58'
         }, (err, nodeB) => {
           if (err) {
@@ -47,7 +44,7 @@ module.exports = {
               throw err
             }
 
-            print(cidToString(result, argv.cidBase))
+            print(cidToString(result, cidBase))
           })
         })
       })
