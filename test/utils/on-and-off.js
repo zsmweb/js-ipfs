@@ -52,7 +52,7 @@ function on (tests) {
       df.spawn({
         type: 'js',
         exec: `./src/cli/bin.js`,
-        initOptions: { bits: 512 }
+        initOptions: { keyType: 'ed25519', bits: 512 }
       }, (err, node) => {
         expect(err).to.not.exist()
         ipfsd = node

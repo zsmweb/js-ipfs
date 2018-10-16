@@ -131,6 +131,35 @@ describe('create node', function () {
     })
   })
 
+  it('init: { type: "ed25519" }', function (done) {
+    this.timeout(80 * 1000)
+
+    const node = new IPFS({
+      repo: tempRepo,
+      init: {
+        keyType: 'ed25519',
+        bits: 512
+      },
+      config: {
+        Addresses: {
+          Swarm: []
+        }
+      }
+    })
+
+    node.once('start', (err) => {
+      expect(err).to.not.exist()
+      node.config.get((err, config) => {
+        expect(err).to.not.exist()
+        expect(config.Identity).to.exist()
+        expect(config.Identity.PrivKey.length).is.below(512)
+        expect(node._peerInfo.id.privKey.constructor.name).to.eql('Ed25519PrivateKey')
+        node.once('stop', done)
+        node.stop()
+      })
+    })
+  })
+
   it('init: false errors (start default: true) and errors only once', function (done) {
     this.timeout(80 * 1000)
 
