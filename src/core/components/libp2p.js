@@ -16,6 +16,7 @@ module.exports = function libp2p (self) {
 
         const defaultBundle = (opts) => {
           const libp2pDefaults = {
+            datastore: opts.datastore,
             peerInfo: opts.peerInfo,
             peerBook: opts.peerBook,
             config: {
@@ -76,6 +77,7 @@ module.exports = function libp2p (self) {
         self._libp2pNode = libp2pBundle({
           options: self._options,
           config: config,
+          datastore: self._repo.datastore,
           peerInfo: self._peerInfo,
           peerBook: self._peerInfoBook
         })
