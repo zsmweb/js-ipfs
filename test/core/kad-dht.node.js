@@ -41,7 +41,9 @@ describe('kad-dht is routing content and peers correctly', () => {
   let addrC
 
   let nodes
-  before((done) => {
+  before(function (done) {
+    this.timeout(30 * 1000)
+
     parallel([
       (cb) => createNode(cb),
       (cb) => createNode(cb),

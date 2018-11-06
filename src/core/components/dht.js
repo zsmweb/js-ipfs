@@ -7,7 +7,6 @@ const CID = require('cids')
 const multihash = require('multihashes')
 const each = require('async/each')
 const setImmediate = require('async/setImmediate')
-// const bsplit = require('buffer-split')
 const errCode = require('err-code')
 
 module.exports = (self) => {
@@ -35,7 +34,7 @@ module.exports = (self) => {
         }
       }
 
-      self._libp2pNode.dht.get(key, options.timeout, callback)
+      self._libp2pNode.dht.get(key, options, callback)
     }),
 
     /**
@@ -92,7 +91,23 @@ module.exports = (self) => {
 
       opts = opts || {}
 
-      self._libp2pNode.contentRouting.findProviders(key, opts.timeout || null, callback)
+      self._libp2pNode.contentRouting.findProviders(key, opts, (err, res) => {
+        if (err) {
+          return callback(err)
+        }
+
+        // convert to go-ipfs return value, we need to revisit
+        // this. For now will just conform.
+        const goResult = {
+          responses: res.map((peerInfo) => ({
+            id: peerInfo.id.toB58String(),
+            addrs: peerInfo.multiaddrs.toArray().map((a) => a.toString())
+          })),
+          type: 4
+        }
+
+        callback(null, goResult)
+      })
     }),
 
     /**
@@ -114,14 +129,13 @@ module.exports = (self) => {
 
         // convert to go-ipfs return value, we need to revisit
         // this. For now will just conform.
-        const goResult = [
-          {
-            Responses: [{
-              ID: info.id.toB58String(),
-              Addresses: info.multiaddrs.toArray().map((a) => a.toString())
-            }]
-          }
-        ]
+        const goResult = {
+          responses: [{
+            id: info.id.toB58String(),
+            addrs: info.multiaddrs.toArray().map((a) => a.toString())
+          }],
+          type: 2
+        }
 
         callback(null, goResult)
       })
@@ -176,7 +190,14 @@ module.exports = (self) => {
      * @param {function(Error, Array<PeerId>)} [callback]
      * @returns {Promise<Array<PeerId>>|void}
      */
-    query: promisify((peerId, callback) => {
+    query: promisify((peerId, opts, callback) => {
+      if (typeof opts === 'function') {
+        callback = opts
+        opts = {}
+      }
+
+      opts = opts || {}
+
       if (typeof peerId === 'string') {
         peerId = PeerId.createFromB58String(peerId)
       }
