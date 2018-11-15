@@ -90,6 +90,10 @@ describe('interface-ipfs-core over ipfs-api tests', () => {
               config = undefined
             }
 
+            config = config || {
+              Bootstrap: []
+            }
+
             const spawnOptions = { repoPath, config, initOptions: { bits: 512 } }
 
             ipfsFactory.spawn(spawnOptions, (err, _ipfsd) => {
@@ -106,7 +110,7 @@ describe('interface-ipfs-core over ipfs-api tests', () => {
     }
   }))
 
-  tests.types(defaultCommonFactory, { skip: { reason: 'FIXME: currently failing' } })
+  tests.types(defaultCommonFactory)
 
   tests.util(defaultCommonFactory, { skip: { reason: 'FIXME: currently failing' } })
 })
