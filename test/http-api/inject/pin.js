@@ -3,6 +3,9 @@
 'use strict'
 
 const expect = require('chai').expect
+const FormData = require('form-data')
+const streamToPromise = require('stream-to-promise')
+const multibase = require('multibase')
 
 // We use existing pin structure in the go-ipfs-repo fixture
 // so that we don't have to stream a bunch of object/put operations
@@ -77,6 +80,62 @@ module.exports = (http) => {
           })
         })
       })
+
+      it('should remove pin and return base64 encoded CID', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+            const hash = JSON.parse(res.result).Hash
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/rm?arg=${hash}&cid-base=base64`
+            }, (res) => {
+              expect(res.statusCode).to.equal(200)
+              res.result.Pins.forEach(cid => {
+                expect(multibase.isEncoded(cid)).to.deep.equal('base64')
+              })
+              done()
+            })
+          })
+        })
+      })
+
+      it('should not remove pin for invalid cid-base option', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+            const hash = JSON.parse(res.result).Hash
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/rm?arg=${hash}&cid-base=invalid`
+            }, (res) => {
+              expect(res.statusCode).to.equal(400)
+              expect(res.result.Message).to.include('child "cid-base" fails')
+              done()
+            })
+          })
+        })
+      })
     })
 
     describe('add', () => {
@@ -113,6 +172,62 @@ module.exports = (http) => {
           expect(res.statusCode).to.equal(500)
           expect(res.result.Message).to.match(/already pinned recursively/)
           done()
+        })
+      })
+
+      it('should add pin and return base64 encoded CID', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add?pin=false',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+            const hash = JSON.parse(res.result).Hash
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/add?arg=${hash}&cid-base=base64`
+            }, (res) => {
+              expect(res.statusCode).to.equal(200)
+              res.result.Pins.forEach(cid => {
+                expect(multibase.isEncoded(cid)).to.deep.equal('base64')
+              })
+              done()
+            })
+          })
+        })
+      })
+
+      it('should not add pin for invalid cid-base option', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add?pin=false',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+            const hash = JSON.parse(res.result).Hash
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/add?arg=${hash}&cid-base=invalid`
+            }, (res) => {
+              expect(res.statusCode).to.equal(400)
+              expect(res.result.Message).to.include('child "cid-base" fails')
+              done()
+            })
+          })
         })
       })
     })
@@ -163,6 +278,60 @@ module.exports = (http) => {
           expect(res.result.Keys['QmVtU7ths96fMgZ8YSZAbKghyieq7AjxNdcqyVzxTt3qVe'])
             .to.deep.eql({ Type: 'recursive' })
           done()
+        })
+      })
+
+      it('should list pins and return base64 encoded CIDs', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/ls?cid-base=base64`
+            }, (res) => {
+              expect(res.statusCode).to.equal(200)
+              Object.keys(res.result.Keys).forEach(cid => {
+                expect(multibase.isEncoded(cid)).to.deep.equal('base64')
+              })
+              done()
+            })
+          })
+        })
+      })
+
+      it('should not list pins for invalid cid-base option', done => {
+        const form = new FormData()
+        form.append('data', Buffer.from('TEST' + Date.now()))
+        const headers = form.getHeaders()
+
+        streamToPromise(form).then((payload) => {
+          api.inject({
+            method: 'POST',
+            url: '/api/v0/add',
+            headers: headers,
+            payload: payload
+          }, (res) => {
+            expect(res.statusCode).to.equal(200)
+
+            api.inject({
+              method: 'POST',
+              url: `/api/v0/pin/ls?cid-base=invalid`
+            }, (res) => {
+              expect(res.statusCode).to.equal(400)
+              expect(res.result.Message).to.include('child "cid-base" fails')
+              done()
+            })
+          })
         })
       })
     })
