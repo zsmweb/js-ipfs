@@ -1,6 +1,6 @@
 'use strict'
 
-const mh = require('multihashes')
+const CID = require('cids')
 const multipart = require('ipfs-multipart')
 const debug = require('debug')
 const tar = require('tar-stream')
@@ -51,8 +51,10 @@ exports.parseKey = (request, reply) => {
     key = key.substring(0, slashIndex)
   }
 
+  let cid
+
   try {
-    mh.fromB58String(key)
+    cid = new CID(key)
   } catch (err) {
     log.error(err)
     return reply({
@@ -63,6 +65,7 @@ exports.parseKey = (request, reply) => {
   }
 
   reply({
+    cid,
     key: request.query.arg,
     options: {
       offset: numberFromQuery(request.query, 'offset'),
@@ -297,7 +300,7 @@ exports.ls = {
 
   // main route handler which is called after the above `parseArgs`, but only if the args were valid
   handler: (request, reply) => {
-    const key = request.pre.args.key
+    const { cid, key } = request.pre.args
     const ipfs = request.server.app.ipfs
     const recursive = request.query && request.query.recursive === 'true'
     const cidBase = request.query['cid-base']
@@ -313,7 +316,7 @@ exports.ls = {
 
       reply({
         Objects: [{
-          Hash: cidToString(key, cidBase),
+          Hash: cidToString(cid, cidBase),
           Links: files.map((file) => ({
             Name: file.name,
             Hash: cidToString(file.hash, cidBase),
