@@ -4,11 +4,7 @@ const bl = require('bl')
 const fs = require('fs')
 const multibase = require('multibase')
 const { print } = require('../../../utils')
-const {
-  util: {
-    cid
-  }
-} = require('ipld-dag-pb')
+const dagPB = require('ipld-dag-pb')
 const { cidToString } = require('../../../../utils/cid')
 
 function appendData (key, data, ipfs, options) {
@@ -19,7 +15,7 @@ function appendData (key, data, ipfs, options) {
       throw err
     }
 
-    cid(node, (err, cid) => {
+    dagPB.util.cid(node, (err, cid) => {
       if (err) {
         throw err
       }

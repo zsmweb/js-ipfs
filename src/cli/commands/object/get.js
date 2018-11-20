@@ -2,11 +2,7 @@
 
 const multibase = require('multibase')
 const { print } = require('../../utils')
-const {
-  util: {
-    cid
-  }
-} = require('ipld-dag-pb')
+const dagPB = require('ipld-dag-pb')
 const { cidToString } = require('../../../utils/cid')
 
 module.exports = {
@@ -32,7 +28,7 @@ module.exports = {
         throw err
       }
 
-      cid(node, (err, result) => {
+      dagPB.util.cid(node, (err, result) => {
         if (err) {
           throw err
         }
