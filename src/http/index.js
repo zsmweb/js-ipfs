@@ -67,6 +67,7 @@ function HttpApi (repo, config, cliArgs) {
         try {
           // start the daemon
           this.node = new IPFS({
+            silent: cliArgs.silent,
             repo: repo,
             init: init,
             start: true,

@@ -129,7 +129,6 @@ class IPFS extends EventEmitter {
     this._ipns = new IPNS(null, this)
     this._print = this._options.silent ? this.log : console.log
 
-
     // IPFS Core exposed components
     //   - for booting up a node
     this.init = components.init(this)
