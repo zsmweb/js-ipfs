@@ -16,7 +16,7 @@ check:
   stage: check
   script:
     - npm run lint
-    - npm run dep-check -i electron-webrtc -i wrtc
+    - npm run dep-check
     # - npm install --no-lockfile @commitlint/config-conventional @commitlint/cli --save-dev
     # - npx commitlint --extends=@commitlint/config-conventional --from=$CI_COMMIT_BEFORE_SHA --to=$CI_COMMIT_SHA
     - npm run build
