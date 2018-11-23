@@ -22,7 +22,7 @@ module.exports = {
       included: false
     }],
     browserNoActivityTimeout: 100 * 1000,
-    reporters: ['coverage-istanbul'],
+    reporters: ['mocha-own', 'coverage-istanbul'],
     coverageIstanbulReporter: {
       reports: ['json'],
       dir: path.join(__dirname, 'coverage'),
