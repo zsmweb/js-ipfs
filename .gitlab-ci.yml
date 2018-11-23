@@ -47,7 +47,6 @@ linux-node-11:
   image: node:11
   stage: test
   script:
-    - ls ./node_modules/go-ipfs-dep/go-ipfs
     - npx nyc -s npm run test:node -- --bail
   artifacts:
     paths:
